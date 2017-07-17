@@ -3,7 +3,7 @@
         private $Calendar = array();
          
 
-        public function create_event($title, $start_time, $end_time, $location){
+        public function create_event($title, $start_time, $end_time, $location, $notes){
             $title = "Event Title";
         }
 
@@ -13,7 +13,6 @@
         private $Event = array();
 
         public function new_event($title, $start_time, $end_time, $location){
-            
+
         }
     }
-
