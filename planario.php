@@ -1,43 +1,41 @@
 <?php
 /*
 Plugin Name: Planario
-Description: Store dates and times
+Description: Store events and times.
 Author: Justin Sitter
 Author URI: http://jaytria.com
 Version: 0.1
 */
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Add Table to database on plugin install
+//  Add Table to wordpress database on plugin install
 // ────────────────────────────────────────────────────────────────────────────────
 
 function planario_install(){
     global $wpdb;
-    $table_name = $wpdb->prefix . "_planario_events"; //Piece together plugin table name
+    $table_name = $wpdb->prefix . "planario_events"; //Piece together plugin table name
     $charset_collate = $wpdb->get_charset_collate();  
 
 
     /* ────────────────────────────────────────────────────────────────────────────────
-        event_id : primary key
+        id : primary key
         user_id : wordpress user_id
-        event : 
-        start_time:
-        end_time
-     */// ────────────────────────────────────────────────────────────────────────────────
+        event : Name of event
+        start_time: date object
+        end_time : date object
+    */// ────────────────────────────────────────────────────────────────────────────────
 
     $sql_query = "CREATE TABLE " . $table_name . " (
-        event_id mediumint(9) NOT NULL AUTO_INCREMENT, 
-        user_id int(5) NOT NULL,
-        title varchar(256) DEFAULT '' NOT NULL,
-        start_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-        end_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-        location varchar(256) DEFAULT '' NOT NULL,
-        notes longtext DEFAULT '' NOT NULL,
-        PRIMARY KEY  (id)
-    )   $charset_collate;";
+      id int(10) NOT NULL AUTO_INCREMENT,
+      user_id int(10) NOT NULL,
+      event tinytext NOT NULL,
+      start_time VARCHAR(100) NULL,
+      end_time VARCHAR(100) NULL,
+      PRIMARY KEY  (id),
+    );";
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php'); //call dbDelta function from upgrade.php to update db
-    dbDelta( $sql );
+    dbDelta( $sql_query );
 
 
 }
@@ -54,13 +52,13 @@ function planario_install(){
 
 */// ────────────────────────────────────────────────────────────────────────────────
 function planario_db_insert( $record ){
-    $user_id = $record['event'];
-    $start_time = $record['user_id'];
-    $end_time = $record['start_time'];
-    $location = $record['end_time'];
+    $event = $record['event'];
+    $user_id = $record['user_id'];
+    $start_time = $record['start_time'];
+    $end_time = $record['end_time'];
     
     global $wpdb;
-    $table_name = $wpdb->prefix . '_planario_events';
+    $table_name = $wpdb->prefix . 'planario_events';
 
     $wpdb->insert(
         $table_name,
@@ -75,28 +73,52 @@ function planario_db_insert( $record ){
 }
 
 function planario_get_event_all( $user_id ){
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'planario_events';
 
-}
-
-function planario_get_event_range( $user_id ){
+    $returned_array = $wpdb->get_results( "SELECT * FROM ".$table_name." WHERE user_id = ".$user_id, ARRAY_A );
 
 }
 
 function planario_remove_event( $event_id ){
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'planario_events';
+    $return = $wpdb->delete($table_name, array( 'ID' => $event_id));
 
 }
 
 function db_test_insert(){
+    
     $record = array(
         'event' => 'Meet me in Seattle @ Noon',
-        'user_id' => '23',
+        'user_id' => get_current_user_id(),
         'start_time' => "0000-00-00 00:00:00",
         'end_time' => "0000-00-00 00:00:00",
     );
+
+    planario_db_insert($record);
+}
+
+function db_test_list_events(){
+    planario_get_event_all('23');
+}
+
+function db_test_delete(){
+    planario_remove_event('10');
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Activate Install functions on plugin initilization
+//  Activate db table install functions on plugin initilization
 // ────────────────────────────────────────────────────────────────────────────────
 register_activation_hook( __FILE__, 'planario_install');
 register_activation_hook( __FILE__, 'db_test_insert' );
+register_activation_hook( __FILE__, 'db_test_list_events');
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  Create Menu Item
+//      function handles creating menu and directing traffic to plugin page
+// ────────────────────────────────────────────────────────────────────────────────
+function planario_menu_item(){
+    add_menu_page('Planario Event Manager', 'Planario Events', 'manage_options', plugin_dir_path( __FILE__ ) . 'planario_page.php');
+}
+add_action('admin_menu', 'planario_menu_item');
