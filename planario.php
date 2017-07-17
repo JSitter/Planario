@@ -72,12 +72,14 @@ function planario_db_insert( $record ){
 
 }
 
+//GET ALL EVENTS FOR USER
 function planario_get_event_all( $user_id ){
     global $wpdb;
-    $table_name = $wpdb->prefix . 'planario_events';
-
-    $returned_array = $wpdb->get_results( "SELECT * FROM ".$table_name." WHERE user_id = ".$user_id, ARRAY_A );
-
+    $table_name = DB_NAME . ".".$wpdb->prefix . 'planario_events';
+    //echo DB_NAME;
+    $results = $wpdb->get_results("SELECT * FROM $table_name WHERE user_id=$user_id");
+    print_r($results);
+    
 }
 
 function planario_remove_event( $event_id ){
@@ -100,19 +102,23 @@ function db_test_insert(){
 }
 
 function db_test_list_events(){
-    planario_get_event_all('23');
+    $returned_array = planario_get_event_all('23');
+
+    print(count($returned_array));
+   
 }
 
 function db_test_delete(){
-    planario_remove_event('10');
+    planario_remove_event('22');
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  Activate db table install functions on plugin initilization
 // ────────────────────────────────────────────────────────────────────────────────
 register_activation_hook( __FILE__, 'planario_install');
-register_activation_hook( __FILE__, 'db_test_insert' );
+//register_activation_hook( __FILE__, 'db_test_insert' );
 register_activation_hook( __FILE__, 'db_test_list_events');
+register_activation_hook( __FILE__, 'db_test_delete');
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  Create Menu Item

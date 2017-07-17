@@ -8,8 +8,6 @@ $count = count($results);
 if ($count == 0 ){
     $count = 'No';
 };
+echo $count;
+echo _n(' result', ' results', "0"); 
 ?>
-Results are In:</br>
-
-<?php echo $count ; ?>
-<?php echo _n(' result', ' results', "0"); ?>
