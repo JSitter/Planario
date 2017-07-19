@@ -1,16 +1,23 @@
 <?php
 /*
 Plugin Name: Planario
-Description: Store events and times.
+Description: Simple event planner created for employment consideration at Yardi.
 Author: Justin Sitter
 Author URI: http://jaytria.com
 Version: 0.1
 */
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Add Table to wordpress database on plugin install
+//  Planario
+// ────────────────────────────────────────────────────────────────────────────────
+//
+//  Simple event planner Wordpress plugin 
+//  for employment consideration at Yardi
 // ────────────────────────────────────────────────────────────────────────────────
 
+// ────────────────────────────────────────────────────────────────────────────────
+//  Add Table to wordpress database on plugin install
+// ────────────────────────────────────────────────────────────────────────────────
 function planario_install(){
     global $wpdb;
     $table_name = $wpdb->prefix . "planario_events"; //Piece together plugin table name
@@ -36,7 +43,6 @@ function planario_install(){
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php'); //call dbDelta function from upgrade.php to update db
     dbDelta( $sql_query );
-
 
 }
 
@@ -69,26 +75,86 @@ function planario_db_insert( $record ){
             'end_time' => $end_time,
         )
     );
-
 }
 
-//GET ALL EVENTS FOR USER
+// ────────────────────────────────────────────────────────────────────────────────
+//  Get all events belonging to logged-in user
+// ────────────────────────────────────────────────────────────────────────────────
 function planario_get_event_all( $user_id ){
     global $wpdb;
     $table_name = DB_NAME . ".".$wpdb->prefix . 'planario_events';
-    //echo DB_NAME;
-    $results = $wpdb->get_results("SELECT * FROM $table_name WHERE user_id=$user_id");
-    print_r($results);
-    
+
+    return $wpdb->get_results("SELECT * FROM $table_name WHERE user_id=$user_id");
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+//  Delete Event by event_id
+// ────────────────────────────────────────────────────────────────────────────────
 function planario_remove_event( $event_id ){
     global $wpdb;
     $table_name = $wpdb->prefix . 'planario_events';
-    $return = $wpdb->delete($table_name, array( 'ID' => $event_id));
 
+    return $wpdb->delete($table_name, array( 'ID' => $event_id));
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+//  Activate db table install functions on plugin initilization
+// ────────────────────────────────────────────────────────────────────────────────
+register_activation_hook( __FILE__, 'planario_install');
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  Create Menu Item
+//      function handles creating menu and directing traffic to plugin page
+// ────────────────────────────────────────────────────────────────────────────────
+function planario_menu_item(){
+    add_menu_page('Planario Event Manager', 'Planario Events', 'manage_options', plugin_dir_path( __FILE__ ) . 'planario_page.php');
+}
+
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  Helper Functions
+// ────────────────────────────────────────────────────────────────────────────────
+function planario_build_html_table_row( $values ){
+    $html_row = "";
+    foreach( $values as $value){
+        $html_row .= "<th>".$value."</th>";
+    }
+
+    return $html_row;
+}
+
+function planario_build_html_table( $db_return ){
+    $html_table = "<table class='planario'>";
+    foreach($db_return as $record){
+       $row = planario_build_html_table_row($record);
+        $html_table .= "<tr>".$row. "</tr>";
+    }
+    $html_table .= "</table>";
+    return $html_table;
+}
+
+function planario_load_plugin_styles( $page ){
+
+    //Only load CSS on plugin page
+    if($page == "planario"){
+       // $css_path = plugin_dir_path(__FILE__) . "styles.css";
+    wp_enqueue_style( 'custom_admin_style', plugins_url('styles.css', __FILE__ ));
+
+    }
+    print("hellow world");
+    wp_enqueue_style( 'custom_admin_style', plugins_url('styles.css', __FILE__ ));
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  Action Items
+// ────────────────────────────────────────────────────────────────────────────────
+add_action('admin_menu', 'planario_menu_item');
+add_action( 'admin_enqueue_scripts', 'planario_load_plugin_styles');
+
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  Tests
+// ────────────────────────────────────────────────────────────────────────────────
 function db_test_insert(){
     
     $record = array(
@@ -112,19 +178,6 @@ function db_test_delete(){
     planario_remove_event('22');
 }
 
-// ────────────────────────────────────────────────────────────────────────────────
-//  Activate db table install functions on plugin initilization
-// ────────────────────────────────────────────────────────────────────────────────
-register_activation_hook( __FILE__, 'planario_install');
-//register_activation_hook( __FILE__, 'db_test_insert' );
+/* //register_activation_hook( __FILE__, 'db_test_insert' );
 register_activation_hook( __FILE__, 'db_test_list_events');
-register_activation_hook( __FILE__, 'db_test_delete');
-
-// ────────────────────────────────────────────────────────────────────────────────
-//  Create Menu Item
-//      function handles creating menu and directing traffic to plugin page
-// ────────────────────────────────────────────────────────────────────────────────
-function planario_menu_item(){
-    add_menu_page('Planario Event Manager', 'Planario Events', 'manage_options', plugin_dir_path( __FILE__ ) . 'planario_page.php');
-}
-add_action('admin_menu', 'planario_menu_item');
+register_activation_hook( __FILE__, 'db_test_delete'); */
