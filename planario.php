@@ -8,7 +8,7 @@ Version: 0.1
 */
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Planario
+//  Planario Version 0.1
 // ────────────────────────────────────────────────────────────────────────────────
 //
 //  Simple event planner Wordpress plugin 
@@ -84,7 +84,7 @@ function planario_get_event_all( $user_id ){
     global $wpdb;
     $table_name = DB_NAME . ".".$wpdb->prefix . 'planario_events';
 
-    return $wpdb->get_results("SELECT * FROM $table_name WHERE user_id=$user_id");
+    return $wpdb->get_results("SELECT event, start_time, end_time FROM $table_name WHERE user_id=$user_id");
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ function planario_menu_item(){
 
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Helper Functions
+//  Build HTML Table
 // ────────────────────────────────────────────────────────────────────────────────
 function planario_build_html_table_row( $values ){
     $html_row = "";
@@ -133,6 +133,9 @@ function planario_build_html_table( $db_return ){
     return $html_table;
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+//  Load stylesheet on admin page
+// ────────────────────────────────────────────────────────────────────────────────
 function planario_load_plugin_styles( $page ){
 
     //Only load CSS on plugin page
