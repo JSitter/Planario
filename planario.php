@@ -58,10 +58,10 @@ function planario_install(){
 
 */// ────────────────────────────────────────────────────────────────────────────────
 function planario_db_insert( $record ){
-    $event = $record['event'];
-    $user_id = $record['user_id'];
-    $start_time = $record['start_time'];
-    $end_time = $record['end_time'];
+    $event = sanitize_text_field($record['event']);
+    $user_id = sanitize_text_field($record['user_id']);
+    $start_time = sanitize_text_field($record['start_time']);
+    $end_time = sanitize_text_field($record['end_time']);
     
     global $wpdb;
     $table_name = $wpdb->prefix . 'planario_events';
@@ -173,6 +173,8 @@ add_action( 'admin_enqueue_scripts', 'planario_load_plugin_page_items');
 //Ajax Requests
 //delete_event action
 add_action('wp_ajax_delete_event', 'planario_action_delete_event');
+//add_event action
+add_action('wp_ajax_add_event', 'planario_action_add_event');
 
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -185,6 +187,20 @@ function planario_action_delete_event(){
     wp_send_json_success(planario_event_table());
     wp_die();
 
+}
+
+function planario_action_add_event(){
+
+    $record = array(
+        'event'     =>  $_POST['event_name'],
+        'user_id'   =>  get_current_user_id(), 
+        'start_time'=>  $_POST['start_time'],
+        'end_time'  =>  $_POST['end_time'],   
+    );
+    planario_db_insert($record);
+
+    wp_send_json_success(planario_event_table());
+    wp_die;
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
