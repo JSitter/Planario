@@ -1,8 +1,49 @@
-table{
-    width: 90%;
+div#planario-plugin-container{
+    max-width: 1000px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+table.planario{
+    border-radius: 5px;
     background-color: #333;
     color: #eee;
 }
-th{
+table.planario td{
+    width: 350px;
     color:red;
+    text-align: center;
+}
+
+.planario-ctl-column{
+    width: 50px;
+}
+
+.planario-delete-btn{
+    display: block;
+    width: 50px;
+    height: 25px;
+    border-radius: 5px;
+    border: 1px solid #f44283;
+    
+    color: #f44283;
+    height: 20px;
+    line-height: 20px;
+
+    cursor:pointer;
+
+    user-select: none;  /* Prevent Text Selection */
+    -webkit-user-select: none; /* Safari Compatibility */
+    -moz-user-select: none; /* Firefox Compatibility */
+    -ms-user-select: none; /* MS Edge Compatibility */
+}
+
+a.planario-delete-btn:active{
+    border-color: white;
+    background-color: red !important;
+    color: black;
+}
+a.planario-delete-btn:hover{
+    color: #444;
+    background-color: #f44283;
 }

@@ -40,8 +40,8 @@ function planario_install(){
       end_time VARCHAR(100) NULL,
       PRIMARY KEY  (id),
     );";
-
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php'); //call dbDelta function from upgrade.php to update db
+    //call dbDelta function from upgrade.php to update db
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php'); 
     dbDelta( $sql_query );
 
 }
@@ -84,11 +84,11 @@ function planario_get_event_all( $user_id ){
     global $wpdb;
     $table_name = DB_NAME . ".".$wpdb->prefix . 'planario_events';
 
-    return $wpdb->get_results("SELECT event, start_time, end_time FROM $table_name WHERE user_id=$user_id");
+    return $wpdb->get_results("SELECT id, event, start_time, end_time FROM $table_name WHERE user_id=$user_id");
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-//  Delete Event by event_id
+//  Delete Event by id
 // ────────────────────────────────────────────────────────────────────────────────
 function planario_remove_event( $event_id ){
     global $wpdb;
@@ -114,17 +114,23 @@ function planario_menu_item(){
 // ────────────────────────────────────────────────────────────────────────────────
 //  Build HTML Table
 // ────────────────────────────────────────────────────────────────────────────────
-function planario_build_html_table_row( $values ){
-    $html_row = "";
-    foreach( $values as $value){
-        $html_row .= "<th>".$value."</th>";
-    }
+function planario_event_table(){
+    $results = planario_get_event_all(get_current_user_id());
+
+    return planario_build_html_table($results);
+};
+
+function planario_build_html_table_row( $values ){   
+    $html_row = "<td>$values->event</td><td>$values->start_time</td><td>$values->end_time</td>";
+    
+    //Add Delete Button
+    $html_row .= "<td class='planario-ctl-column'><a onclick='delete_entry($values->id)' class='planario-delete-btn'>Delete</a></td>";
 
     return $html_row;
 }
 
 function planario_build_html_table( $db_return ){
-    $html_table = "<table class='planario'>";
+    $html_table = "<table id='planario_table' class='planario'>";
     foreach($db_return as $record){
        $row = planario_build_html_table_row($record);
         $html_table .= "<tr>".$row. "</tr>";
@@ -136,24 +142,50 @@ function planario_build_html_table( $db_return ){
 // ────────────────────────────────────────────────────────────────────────────────
 //  Load stylesheet on admin page
 // ────────────────────────────────────────────────────────────────────────────────
-function planario_load_plugin_styles( $page ){
+function planario_load_plugin_page_items( $page ){
 
-    //Only load CSS on plugin page
-    if($page == "planario"){
-       // $css_path = plugin_dir_path(__FILE__) . "styles.css";
-    wp_enqueue_style( 'custom_admin_style', plugins_url('styles.css', __FILE__ ));
-
+    //Only load files on plugin page
+    if($page != "planario/planario_page.php"){
+       
+       return;
     }
-    print("hellow world");
+
     wp_enqueue_style( 'custom_admin_style', plugins_url('styles.css', __FILE__ ));
+
+    //Add Javascript to page
+    wp_register_script('planario-page-js', plugin_dir_url(__FILE__) . 'planario_script.js');
+    wp_enqueue_script('planario-page-js');
+    
+    //Add Ajax to page
+    wp_localize_script( 'planario-page-js', 'ajax_object', array('request' => admin_url('admin-ajax.php')));
+
 }
+
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  Action Items
 // ────────────────────────────────────────────────────────────────────────────────
+//add menu item
 add_action('admin_menu', 'planario_menu_item');
-add_action( 'admin_enqueue_scripts', 'planario_load_plugin_styles');
+//Enqueue css on admin page
+add_action( 'admin_enqueue_scripts', 'planario_load_plugin_page_items');
 
+//Ajax Requests
+//delete_event action
+add_action('wp_ajax_delete_event', 'planario_action_delete_event');
+
+
+// ────────────────────────────────────────────────────────────────────────────────
+//  AJAX Requests
+//      adding AJAX function after wp_ajax per wordpress codex
+// ────────────────────────────────────────────────────────────────────────────────
+function planario_action_delete_event(){
+    planario_remove_event($_POST['event_id']);
+   
+    wp_send_json_success(planario_event_table());
+    wp_die();
+
+}
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  Tests
