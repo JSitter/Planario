@@ -77,6 +77,23 @@ function planario_db_insert( $record ){
     );
 }
 
+function planario_db_update($record){
+    global $wpdb;
+    $id = stripslashes_deep(sanitize_text_field($record['id']));
+    $field = sanitize_text_field($record['field']);
+    $data = sanitize_text_field($record['data']);
+
+    if($field == 'event_title'){
+        $field = 'event';
+    } 
+
+    $table_name = $wpdb->prefix . 'planario_events';
+    
+    return $wpdb->update($table_name, array($field=>$data), array( 'id'=>$id) );
+
+       
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 //  Get all events belonging to logged-in user
 // ────────────────────────────────────────────────────────────────────────────────
@@ -120,8 +137,9 @@ function planario_event_table(){
     return planario_build_html_table($results);
 };
 
-function planario_build_html_table_row( $values ){   
-    $html_row = "<td>$values->event</td><td>$values->start_time</td><td>$values->end_time</td>";
+function planario_build_html_table_row( $values ){
+
+    $html_row = "<td class='planario_data_item' data-id='$values->id' data-column='event_title'>$values->event</td><td class='planario_data_item' data-id='$values->id' data-column='start_time'>$values->start_time</td><td class='planario_data_item' data-id='$values->id' data-column='end_time'>$values->end_time</td>";
     
     //Add Delete Button
     $html_row .= "<td class='planario-ctl-column'><a onclick='delete_entry($values->id)' class='planario-delete-btn'>Delete</a></td>";
@@ -154,7 +172,8 @@ function planario_load_plugin_page_items( $page ){
 
     //Add Javascript to page
     wp_register_script('planario-page-js', plugin_dir_url(__FILE__) . 'planario_script.js');
-    wp_enqueue_script('planario-page-js');
+    wp_enqueue_script('planario-page-js', null, false);
+    wp_enqueue_script('jquery');
     
     //Add Ajax to page
     wp_localize_script( 'planario-page-js', 'ajax_object', array('request' => admin_url('admin-ajax.php')));
@@ -175,11 +194,13 @@ add_action( 'admin_enqueue_scripts', 'planario_load_plugin_page_items');
 add_action('wp_ajax_delete_event', 'planario_action_delete_event');
 //add_event action
 add_action('wp_ajax_add_event', 'planario_action_add_event');
+//edit_event action
+add_action('wp_ajax_edit_event', 'planario_action_edit_event');
 
 
 // ────────────────────────────────────────────────────────────────────────────────
 //  AJAX Requests
-//      adding AJAX function after wp_ajax per wordpress codex
+//      adding AJAX functions after wp_ajax per wordpress codex
 // ────────────────────────────────────────────────────────────────────────────────
 function planario_action_delete_event(){
     planario_remove_event($_POST['event_id']);
@@ -198,7 +219,18 @@ function planario_action_add_event(){
         'end_time'  =>  $_POST['end_time'],   
     );
     planario_db_insert($record);
+    wp_send_json_success(planario_event_table());
+    wp_die;
+}
 
+function planario_action_edit_event(){
+    $cell = array(
+    'id' => $_POST['id'],
+    'field'=> $_POST['field'],
+    'data' => $_POST['data']
+    );
+     
+    planario_db_update($cell);
     wp_send_json_success(planario_event_table());
     wp_die;
 }

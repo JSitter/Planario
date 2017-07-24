@@ -47,3 +47,11 @@ a.planario-delete-btn:hover{
     color: #444;
     background-color: #f44283;
 }
+
+.planario_data_item{
+   cursor: text; 
+}
+
+.planario_data_item:hover{
+    background-color: #aaa;
+}
