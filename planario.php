@@ -236,33 +236,3 @@ function planario_action_edit_event(){
     wp_send_json_success(planario_event_table());
     wp_die;
 }
-
-// ────────────────────────────────────────────────────────────────────────────────
-//  Tests
-// ────────────────────────────────────────────────────────────────────────────────
-function db_test_insert(){
-    
-    $record = array(
-        'event' => 'Meet me in Seattle @ Noon',
-        'user_id' => get_current_user_id(),
-        'start_time' => "0000-00-00 00:00:00",
-        'end_time' => "0000-00-00 00:00:00",
-    );
-
-    planario_db_insert($record);
-}
-
-function db_test_list_events(){
-    $returned_array = planario_get_event_all('23');
-
-    print(count($returned_array));
-   
-}
-
-function db_test_delete(){
-    planario_remove_event('22');
-}
-
-/* //register_activation_hook( __FILE__, 'db_test_insert' );
-register_activation_hook( __FILE__, 'db_test_list_events');
-register_activation_hook( __FILE__, 'db_test_delete'); */
