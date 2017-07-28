@@ -47,12 +47,14 @@ function planario_install(){
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-/*  Insert Record into Database
+/*  
+    DB Insert, Update, and Delete functions
+    Insert Record into Database
 
     $record = array(
         'event'     =>  $event, 
         'user_id'   =>  $user_id, 
-        'start_time'=>  $start_time,
+         'start_time'=>  $start_time,
         'end_time'  =>  $end_time,   
 )
 

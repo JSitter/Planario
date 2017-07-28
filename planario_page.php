@@ -5,7 +5,7 @@
         <input name="event_title" placeholder="Event Title"/>
         <input name="start_time" placeholder="Start Time" />
         <input name="end_time" placeholder="End Time" />
-        <a onclick="add_entry()">+</a>
+        <a onclick="add_entry()">Add Event</a>
     </div>
 </div>
 
